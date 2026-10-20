@@ -1,0 +1,114 @@
+PROBAR SPORTSTATS EN EL IPHONE DESDE WINDOWS CON XTOOL
+======================================================
+
+Que se agrego al proyecto para xtool
+------------------------------------
+- Package.swift: xtool no usa .xcodeproj, usa SwiftPM. Este manifiesto compila
+  Frontend/ y Backend/ como la app, en modo Swift 5 (igual que el proyecto Xcode)
+  y para iOS 17.
+- xtool.yml: con el mismo bundle id (cl.ninaspro.sportstats).
+- .gitignore: ignora la carpeta xtool/ que se genera al compilar.
+- Assets.xcassets queda fuera porque en Linux no se puede compilar. El icono
+  todavia no tiene imagen, asi que no se pierde nada. Si despues se agrega uno,
+  se configura con "iconPath: icono.png" en xtool.yml.
+- SportStats.xcodeproj queda igual y sigue sirviendo en Mac.
+
+- .github/workflows/build-ipa.yml: compila la app en un Mac de GitHub Actions.
+
+IMPORTANTE: "xtool dev" NO compila esta app. Las macros de SwiftData (@Model,
+@Attribute, @Relationship) solo se pueden expandir con Xcode en Mac; en Linux
+falla con "plugin for module 'SwiftDataMacros' not found". Por eso la app se
+compila en GitHub Actions y en Ubuntu solo se firma e instala con
+"xtool install" (ver "PROBAR LA APP EN EL IPHONE").
+
+
+PASOS EN WINDOWS (una sola vez)
+-------------------------------
+
+1. Instalar Ubuntu en WSL (PowerShell como administrador):
+
+     wsl --install -d Ubuntu
+
+2. Conectar el iPhone por USB a WSL:
+   - Instalar iTunes o "Apple Devices" desde la Microsoft Store (drivers del iPhone).
+   - Instalar usbipd:
+
+       winget install usbipd
+
+   - Con el iPhone conectado, en PowerShell como administrador:
+
+       usbipd list                      (buscar el BUSID de "Apple Mobile Device")
+       usbipd bind --busid <BUSID>
+       usbipd attach --wsl --busid <BUSID>
+
+     El "attach" se repite cada vez que se reconecta el iPhone.
+
+3. Dentro de Ubuntu:
+   - Instalar Swift 6.4 siguiendo https://swift.org/install/linux
+     Comprobar con:  swift --version
+   - Instalar usbmuxd:
+
+       sudo apt-get install usbmuxd libimobiledevice-utils
+       ideviceinfo        (debe mostrar los datos del iPhone)
+
+4. Descargar Xcode 27 (.xip) desde
+   https://developer.apple.com/download/all/?q=Xcode
+   (en el navegador, iniciando sesion con el Apple ID).
+
+5. Instalar xtool (en Ubuntu):
+
+     curl -fL "https://github.com/xtool-org/xtool/releases/latest/download/xtool-$(uname -m).AppImage" -o xtool
+     chmod +x xtool && sudo mv xtool /usr/local/bin/
+     xtool --help
+     xtool setup
+
+   - xtool setup primero pide el modo de inicio de sesion:
+       0: API Key  -> solo con cuenta de desarrollador pagada (US$99/ano)
+       1: Password -> sirve con un Apple ID gratuito
+     Con Apple ID gratuito elegir 1. Usa APIs privadas de Apple, asi que conviene
+     usar un Apple ID secundario.
+   - Despues pide la ruta del .xip, por ejemplo:
+       /mnt/c/Users/Javier Catalán/Downloads/Xcode_27.0.xip
+   - Para confirmar que funciono:
+
+       swift sdk list     (debe mostrar "darwin")
+
+
+PROBAR LA APP EN EL IPHONE
+--------------------------
+1. Hacer git push a main. GitHub compila solo (tambien se puede lanzar a mano
+   en GitHub -> Actions -> "Compilar IPA" -> Run workflow). Tarda unos minutos.
+2. Cuando termine (check verde), abrir esa ejecucion y descargar el artefacto
+   "SportStats-ipa" (hay que tener sesion iniciada en GitHub). Baja un .zip.
+3. En Ubuntu, con el iPhone conectado (usbipd attach) y desbloqueado:
+
+     cd ~
+     unzip -o "/mnt/c/Users/Javier Catalán/Downloads/SportStats-ipa.zip"
+     xtool install SportStats.ipa     (firma con tu Apple ID e instala)
+
+- La primera vez, activar en el iPhone:
+    Ajustes -> Privacidad y seguridad -> Modo de desarrollador
+- Luego confiar en el Apple ID:
+    Ajustes -> General -> VPN y gestion de dispositivos
+- Con un Apple ID gratuito la app dura 7 dias; para renovarla volver a correr
+  "xtool install SportStats.ipa".
+- Si se cambia el bundle id en xtool.yml, cambiarlo tambien en
+  scripts/gen_xcodeproj.py.
+
+
+PROBLEMAS COMUNES
+-----------------
+- Error "AFCClient.Error.muxError": seguir este comentario, que conecta el
+  iPhone a traves de iTunes en Windows en vez de usbipd:
+  https://github.com/xtool-org/xtool/issues/19#issuecomment-2898986718
+- Errores al compilar en GitHub Actions: abrir la ejecucion en la pestana
+  Actions y revisar el paso "Compilar".
+
+
+ENLACES
+-------
+- xtool:                      https://github.com/xtool-org/xtool
+- Instalacion Linux/Windows:  https://xtool.sh/documentation/xtooldocs/installation-linux
+- Tutorial primera app:       https://xtool.sh/tutorials/xtooldocs/first-app
+- USB en WSL (usbipd):        https://learn.microsoft.com/en-us/windows/wsl/connect-usb
+- Swift para Linux:           https://swift.org/install/linux
