@@ -37,6 +37,8 @@ struct PrimaryButton: View {
             HStack(spacing: 10) {
                 if let systemImage { Image(systemName: systemImage) }
                 Text(title)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
             }
             .font(.system(size: 19, weight: .semibold))
             .foregroundStyle(Theme.onInk)
@@ -56,19 +58,29 @@ struct SecondaryButton: View {
     let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.system(size: 18, weight: .medium))
-                .foregroundStyle(Theme.ink)
-                .padding(.horizontal, 22)
-                .frame(minHeight: 50)
-                .background(
-                    Capsule()
-                        .fill(Theme.cardRaised)
-                        .shadow(color: Theme.shadow, radius: 10, x: 0, y: 5)
-                )
-        }
-        .buttonStyle(PressableStyle())
+        Button(action: action) { SecondaryButtonLabel(title: title) }
+            .buttonStyle(PressableStyle())
+    }
+}
+
+/// Aspecto del botón secundario, para usarlo también dentro de un NavigationLink.
+/// Mantiene su ancho para que palabras cortas no se partan en dos líneas.
+struct SecondaryButtonLabel: View {
+    let title: String
+
+    var body: some View {
+        Text(title)
+            .font(.system(size: 18, weight: .medium))
+            .foregroundStyle(Theme.ink)
+            .lineLimit(1)
+            .padding(.horizontal, 22)
+            .frame(minHeight: 50)
+            .background(
+                Capsule()
+                    .fill(Theme.cardRaised)
+                    .shadow(color: Theme.shadow, radius: 10, x: 0, y: 5)
+            )
+            .fixedSize(horizontal: true, vertical: false)
     }
 }
 
@@ -101,7 +113,9 @@ struct PillSegmented<Option: Hashable>: View {
                     Text(label(option))
                         .font(.system(size: fontSize, weight: selected ? .semibold : .medium))
                         .foregroundStyle(selected ? Theme.ink : Theme.inkSecondary)
-                        .padding(.horizontal, 16)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                        .padding(.horizontal, 8)
                         .frame(maxWidth: .infinity, minHeight: height)
                         .background {
                             if selected {
@@ -165,6 +179,7 @@ struct Chip: View {
         Text(title)
             .font(.system(size: 17, weight: .medium))
             .foregroundStyle(isSelected ? Theme.onInk : Theme.ink)
+            .lineLimit(1)
             .padding(.horizontal, 22)
             .frame(minHeight: 48)
             .background(
@@ -181,6 +196,8 @@ struct TagLabel: View {
         Text(text)
             .font(.system(size: 13, weight: .semibold))
             .foregroundStyle(Theme.inkSecondary)
+            .lineLimit(1)
+            .minimumScaleFactor(0.85)
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
             .background(Capsule().fill(Theme.selection))

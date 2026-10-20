@@ -38,15 +38,8 @@ struct ProfileView: View {
                         .lineLimit(2)
                         .minimumScaleFactor(0.7)
                     Spacer(minLength: 4)
-                    NavigationLink(value: Route.editProfile) {
-                        Text("Editar")
-                            .font(.system(size: 17, weight: .medium))
-                            .foregroundStyle(Theme.ink)
-                            .padding(.horizontal, 20)
-                            .frame(minHeight: 50)
-                            .background(Capsule().fill(Theme.cardRaised).shadow(color: Theme.shadow, radius: 10, x: 0, y: 5))
-                    }
-                    .buttonStyle(PressableStyle())
+                    NavigationLink(value: Route.editProfile) { SecondaryButtonLabel(title: "Editar") }
+                        .buttonStyle(PressableStyle())
                 }
                 .card(padding: 22)
 

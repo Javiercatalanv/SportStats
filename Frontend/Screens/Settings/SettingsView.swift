@@ -32,7 +32,7 @@ struct SettingsView: View {
                     SettingsRow(title: "Tema") {
                         PillSegmented(options: AppTheme.allCases, selection: binding($themeRaw, default: AppTheme.light),
                                       label: \.label, height: 38, fontSize: 16)
-                            .frame(width: 220)
+                            .frame(width: 240)
                     }
                     RowDivider()
                     ToggleRow(title: "Notificaciones", subtitle: "Recordatorios de suplementos", isOn: $notificationsEnabled)
