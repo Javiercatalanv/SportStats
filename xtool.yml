@@ -1,2 +1,3 @@
 version: 1
 bundleID: cl.ninaspro.sportstats
+iconPath: Frontend/Assets.xcassets/AppIcon.appiconset/AppIcon.png
