@@ -69,7 +69,11 @@ private struct DataTile: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(label).font(.system(size: 15, weight: .medium)).foregroundStyle(Theme.inkSecondary)
+            Text(label)
+                .font(.system(size: 15, weight: .medium))
+                .foregroundStyle(Theme.inkSecondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
             Text(value)
                 .font(.system(size: 20, weight: .bold))
                 .foregroundStyle(Theme.ink)

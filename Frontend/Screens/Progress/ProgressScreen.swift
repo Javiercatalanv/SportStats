@@ -152,7 +152,10 @@ private struct StatTile: View {
             Text(value).font(.system(size: 28, weight: .bold).monospacedDigit()).foregroundStyle(Theme.ink)
             Text(caption).font(.system(size: 13)).foregroundStyle(Theme.inkMuted)
         }
-        .card(corner: Theme.cornerMedium, padding: 16)
+        // Tres tarjetas por fila dejan poco ancho: el texto se achica antes que partirse.
+        .lineLimit(1)
+        .minimumScaleFactor(0.7)
+        .card(corner: Theme.cornerMedium, padding: 14)
     }
 }
 
