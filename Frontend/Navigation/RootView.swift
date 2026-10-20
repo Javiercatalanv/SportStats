@@ -46,10 +46,10 @@ struct RootView: View {
             tabStack(.home) { HomeView() }
             tabStack(.profile) { ProfileView() }
         }
-        .safeAreaInset(edge: .bottom, spacing: 0) {
+        .overlay(alignment: .bottom) {
             FloatingTabBar(selection: $tab)
                 .padding(.horizontal, 16)
-                .padding(.bottom, 4)
+                .padding(.bottom, FloatingTabBar.bottomPadding)
         }
         .tint(Theme.ink)
         .onChange(of: scenePhase) { _, phase in
@@ -62,9 +62,11 @@ struct RootView: View {
     private func tabStack<Content: View>(_ item: AppTab, @ViewBuilder content: () -> Content) -> some View {
         NavigationStack {
             content()
+                .tabBarInset()
                 .toolbar(.hidden, for: .navigationBar)
                 .navigationDestination(for: Route.self) { route in
                     RouteDestination(route: route)
+                        .tabBarInset()
                         .toolbar(.hidden, for: .navigationBar)
                 }
         }
@@ -93,9 +95,25 @@ struct RouteDestination: View {
     }
 }
 
+extension View {
+    /// Reserva espacio al final de cada pantalla para que la barra flotante no tape el contenido.
+    /// Va dentro del NavigationStack porque un safeAreaInset puesto afuera no llega a sus pantallas.
+    func tabBarInset() -> some View {
+        safeAreaInset(edge: .bottom, spacing: 0) {
+            Color.clear.frame(height: FloatingTabBar.reservedHeight)
+        }
+    }
+}
+
 struct FloatingTabBar: View {
     @Binding var selection: AppTab
     @Namespace private var namespace
+
+    static let itemHeight: CGFloat = 54
+    static let inset: CGFloat = 6
+    static let bottomPadding: CGFloat = 4
+    /// Alto total que ocupa la barra sobre el borde inferior.
+    static let reservedHeight = itemHeight + inset * 2 + bottomPadding
 
     var body: some View {
         HStack(spacing: 0) {
@@ -112,7 +130,7 @@ struct FloatingTabBar: View {
                             .font(.system(size: 13, weight: .semibold))
                     }
                     .foregroundStyle(selected ? Theme.ink : Theme.inkSecondary)
-                    .frame(maxWidth: .infinity, minHeight: 54)
+                    .frame(maxWidth: .infinity, minHeight: Self.itemHeight)
                     .background {
                         if selected {
                             Capsule()
@@ -126,7 +144,7 @@ struct FloatingTabBar: View {
                 .accessibilityAddTraits(selected ? .isSelected : [])
             }
         }
-        .padding(6)
+        .padding(Self.inset)
         .background(
             Capsule()
                 .fill(Theme.card)
